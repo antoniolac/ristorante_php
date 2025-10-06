@@ -3,7 +3,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //variabili
     $nome = isset($_POST["nome"]) ? $_POST["nome"] : "";
     $piatto = isset($_POST["piatto"]) ? $_POST["piatto"] : "";
-    $allergie = isset($_POST["allergie"]) ? $_POST["allergie"] : "";
+    $allergie = isset($_POST["allergie"]) ? $_POST["allergie"] : [];
+
+    //ricettario con array associativo
+    $ricette = [
+        [
+            "nome" => "pancake",
+            "img" => "https://blog.giallozafferano.it/allacciateilgrembiule/wp-content/uploads/2018/03/ricetta-pancake-perfetti.jpg",
+            "allergeni" => ["uova", "glutine", "lattosio"],
+        ],
+        [
+            "nome" => "lasagne alla bolognese",
+            "img" => "https://www.giallozafferano.it/images/ricette/178/17816/foto_hd/hd650x433_wm.jpg",
+            "allergeni" => ["glutine", "lattosio"],
+        ],
+        [
+            "nome" => "torta alle nocciole",
+            "img" => "https://www.giallozafferano.it/images/ricette/4/473/foto_hd/hd650x433_wm.jpg",
+            "allergeni" => ["frutta secca", "glutine", "lattosio"],
+        ],
+        [
+            "nome" => "spaghetti ai gamberi",
+            "img" => "https://www.giallozafferano.it/images/ricette/232/23245/foto_hd/hd650x433_wm.jpg",
+            "allergeni" => ["crostacei", "glutine"],
+        ],
+    ];
 
     //saluto
     if ($nome != "") {
@@ -16,11 +40,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($piatto != "") {
         echo "<p>Hai scelto di assaggiare: <b>$piatto</b>. Lo prepareremo con cura!</p>";
     } else {
-        echo "<p>il nostro chef ti sorprenderà!</p>";
+        echo "<p>Il nostro chef ti sorprenderà! Ecco le ricette disponibili per te:</p>";
+
+        $trovata = false; 
+        foreach ($ricette as $r) {
+            $compatibile = true;
+
+            //controlla se la ricetta contiene uno degli allergeni selezionati
+            foreach ($allergie as $a) {
+                if (in_array(strtolower($a), array_map('strtolower', $r["allergeni"]))) {
+                    $compatibile = false;
+                    break;
+                }
+            }
+
+            //se compatibile, mostra la ricetta
+            if ($compatibile) {
+                $trovata = true;
+                echo "<div style='margin-bottom: 15px;'>";
+                echo "<h3>" . ucfirst($r["nome"]) . "</h3>";
+                echo "<img src='" . $r["img"] . "' alt='" . $r["nome"] . "' width='300'><br>";
+                echo "</div>";
+            }
+        }
+
+        //se nessuna ricetta è disponibile
+        if (!$trovata) {
+            echo "<p><i>Sembra che il nostro menu non sia adatto alle tue esigenze alimentari...<br>
+            Ma non preoccuparti, il nostro chef preparerà qualcosa di speciale!</i> </p>";
+        }
     }
 
     //allergie
-    if (isset($allergie[0])) {
+    if (!empty($allergie)) {
         echo "<p><b>Allergie da considerare:</b></p><ul>";
         foreach ($allergie as $a) {
             echo "<li>$a</li>";
@@ -49,11 +101,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="text" id="piatto" name="piatto">
         </p>
         <p>Allergie:</p>
-        <label for="all1"><input type="checkbox" id="all1" name="allergie[]" value="Glutine"> Glutine</label><br>
-        <label for="all2"><input type="checkbox" id="all2" name="allergie[]" value="Lattosio"> Lattosio</label><br>
-        <label for="all3"><input type="checkbox" id="all3" name="allergie[]" value="Frutta secca"> Frutta secca</label><br>
-        <label for="all4"><input type="checkbox" id="all4" name="allergie[]" value="Crostacei"> Crostacei</label><br>
-        <label for="all5"><input type="checkbox" id="all5" name="allergie[]" value="Altro"> Altro</label><br><br>
+        <label><input type="checkbox" name="allergie[]" value="Glutine"> Glutine</label><br>
+        <label><input type="checkbox" name="allergie[]" value="Lattosio"> Lattosio</label><br>
+        <label><input type="checkbox" name="allergie[]" value="Frutta secca"> Frutta secca</label><br>
+        <label><input type="checkbox" name="allergie[]" value="Crostacei"> Crostacei</label><br>
+        <label><input type="checkbox" name="allergie[]" value="Altro"> Altro</label><br><br>
         <input type="submit" value="Invia">
     </form>
     <?php
